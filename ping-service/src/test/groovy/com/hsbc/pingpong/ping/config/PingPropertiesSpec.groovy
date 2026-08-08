@@ -19,6 +19,10 @@ class PingPropertiesSpec extends Specification {
         properties.rateLimit.lockFile == null
         properties.kafka.enabled == true
         properties.kafka.topic == "ping-pong-events"
+        properties.kafka.groupId == "ping-service"
+        properties.kafka.maxRetries == 3
+        properties.kafka.dltTopic == "ping-pong-events-dlt"
+        properties.kafka.retryBackoffMs == 1000
     }
 
     def "exposes setters for all nested configuration"() {
@@ -36,6 +40,10 @@ class PingPropertiesSpec extends Specification {
         properties.rateLimit.lockFile = "/tmp/my-bucket.lock"
         properties.kafka.enabled = false
         properties.kafka.topic = "other-events"
+        properties.kafka.groupId = "consumer-a"
+        properties.kafka.maxRetries = 7
+        properties.kafka.dltTopic = "custom-dlt"
+        properties.kafka.retryBackoffMs = 2000
 
         then:
         properties.instanceId == "ping-2"
@@ -48,5 +56,9 @@ class PingPropertiesSpec extends Specification {
         properties.rateLimit.lockFile == "/tmp/my-bucket.lock"
         properties.kafka.enabled == false
         properties.kafka.topic == "other-events"
+        properties.kafka.groupId == "consumer-a"
+        properties.kafka.maxRetries == 7
+        properties.kafka.dltTopic == "custom-dlt"
+        properties.kafka.retryBackoffMs == 2000
     }
 }

@@ -35,18 +35,19 @@ public class PingRequestService {
 
     public Mono<PingPongResult> fireOnce() {
         if (!rateLimiter.tryAcquire()) {
-            return Mono.just(publish(PingPongResult.RATE_LIMITED_LOCALLY, null));
+            return Mono.just(publish(PingPongResult.RATE_LIMITED_LOCALLY, null, null));
         }
         return pingClient.ping()
-                .map(status -> publish(PingResultClassifier.classify(false, status), status))
+                .map(reply -> publish(PingResultClassifier.classify(false, reply.getStatus()), reply.getStatus(), reply.getBody()))
                 .onErrorResume(e -> {
                     log.warn("[{}] Ping request failed: {}", instanceId, e.getMessage());
-                    return Mono.just(publish(PingPongResult.SENT_PONG_THROTTLED, null));
+                    return Mono.just(publish(PingPongResult.SENT_PONG_THROTTLED, null, null));
                 });
     }
 
-    private PingPongResult publish(PingPongResult result, Integer status) {
-        log.info("[{}] [status={}] {}", instanceId, status == null ? "--" : status, result.getDescription());
+    private PingPongResult publish(PingPongResult result, Integer status, String reply) {
+        log.info("[{}] [status={}] [reply={}] {}", instanceId, status == null ? "--" : status,
+                reply == null ? "--" : reply, result.getDescription());
         eventPublisher.publish(result);
         return result;
     }

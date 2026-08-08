@@ -12,7 +12,7 @@
 
     <artifactId>ping-service</artifactId>
     <name>ping-service</name>
-    <description>Ping service: cross-process 2 RPS Redis Lua rate limiter, per-instance logs, Kafka events</description>
+    <description>Ping service: cross-process 2 RPS Redis Lua rate limiter, per-instance logs, Kafka events, Postgres persistence</description>
 
     <dependencies>
         <dependency>
@@ -25,12 +25,21 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>

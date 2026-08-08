@@ -28,5 +28,9 @@ public class PingProperties {
     public static class Kafka {
         private boolean enabled = true;
         private String topic = "ping-pong-events";
+        private String groupId = "ping-service";
+        private int maxRetries = 3;
+        private String dltTopic = "ping-pong-events-dlt";
+        private long retryBackoffMs = 1000;
     }
 }

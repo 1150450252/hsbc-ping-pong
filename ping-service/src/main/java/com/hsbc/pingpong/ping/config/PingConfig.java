@@ -28,7 +28,7 @@ public class PingConfig {
 
     @Bean
     public PingClient pingClient(PingProperties properties) {
-        return new PingClient(properties.getPongUrl());
+        return new PingClient(properties.getPongUrl(), properties.getInstanceId());
     }
 
     @Bean

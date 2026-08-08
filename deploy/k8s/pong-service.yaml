@@ -34,20 +34,6 @@ spec:
           env:
             - name: SERVER_PORT
               value: "8033"
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: kafka:9092
-            - name: POSTGRES_HOST
-              value: postgres
-            - name: POSTGRES_PORT
-              value: "5432"
-            - name: POSTGRES_DB
-              value: pingpong
-            - name: POSTGRES_USER
-              value: appuser
-            - name: POSTGRES_PASSWORD
-              value: mysecretpassword
-            - name: PING_INSTANCE_ID
-              value: pong-1
           readinessProbe:
             tcpSocket:
               port: 8033

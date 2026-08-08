@@ -12,22 +12,28 @@ class PingClientSpec extends Specification {
     def setup() {
         server = new MockWebServer()
         server.start()
-        client = new PingClient(server.url("/").toString())
+        client = new PingClient(server.url("/").toString(), "ping-8011")
     }
 
     def cleanup() {
         server.shutdown()
     }
 
-    def "returns 200 when Pong responds"() {
+    def "sends Hello to Pong and returns 200 World when Pong responds"() {
         given:
-        server.enqueue(new MockResponse().setResponseCode(200).setBody("Pong"))
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("World"))
 
         when:
-        def status = client.ping().block()
+        def reply = client.ping().block()
 
         then:
-        status == 200
+        reply.status == 200
+        reply.body == "World"
+        def request = server.takeRequest()
+        request.method == "POST"
+        request.path == "/api/pong/ping"
+        request.getHeader("X-Ping-Instance") == "ping-8011"
+        request.body.readUtf8() == "Hello"
     }
 
     def "returns 429 when Pong throttles the request"() {
@@ -35,9 +41,10 @@ class PingClientSpec extends Specification {
         server.enqueue(new MockResponse().setResponseCode(429).setBody("Pong throttled"))
 
         when:
-        def status = client.ping().block()
+        def reply = client.ping().block()
 
         then:
-        status == 429
+        reply.status == 429
+        reply.body == "Pong throttled"
     }
 }

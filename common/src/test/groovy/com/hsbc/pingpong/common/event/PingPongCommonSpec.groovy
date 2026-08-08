@@ -5,9 +5,9 @@ import spock.lang.Specification
 
 class PingPongCommonSpec extends Specification {
 
-    def "has exactly the five challenge result categories"() {
+    def "has exactly the three ping-side challenge result categories"() {
         expect:
-        PingPongResult.values().length == 5
+        PingPongResult.values().length == 3
     }
 
     def "every enum value carries a non-blank description"() {
@@ -26,8 +26,6 @@ class PingPongCommonSpec extends Specification {
 
     def "Chinese descriptions reflect the challenge result categories"() {
         expect:
-        PingPongResult.PONG_RESPONDED.descriptionZh.contains("pong")
-        PingPongResult.PONG_THROTTLED.descriptionZh.contains("限流")
         PingPongResult.RATE_LIMITED_LOCALLY.descriptionZh.contains("限流")
         PingPongResult.SENT_PONG_RESPONDED.descriptionZh.contains("已发送")
         PingPongResult.SENT_PONG_THROTTLED.descriptionZh.contains("已发送")
@@ -35,8 +33,6 @@ class PingPongCommonSpec extends Specification {
 
     def "enum descriptions reflect the challenge result categories"() {
         expect:
-        PingPongResult.PONG_RESPONDED.description.contains("responded")
-        PingPongResult.PONG_THROTTLED.description.contains("throttled")
         PingPongResult.RATE_LIMITED_LOCALLY.description.contains("not sent")
         PingPongResult.SENT_PONG_RESPONDED.description.contains("responded")
         PingPongResult.SENT_PONG_THROTTLED.description.contains("throttled")
@@ -60,13 +56,13 @@ class PingPongCommonSpec extends Specification {
         when:
         event.instanceId = "ping-2"
         event.source = "PONG"
-        event.result = PingPongResult.PONG_RESPONDED
+        event.result = PingPongResult.SENT_PONG_RESPONDED
         event.timestamp = 456L
 
         then:
         event.instanceId == "ping-2"
         event.source == "PONG"
-        event.result == PingPongResult.PONG_RESPONDED
+        event.result == PingPongResult.SENT_PONG_RESPONDED
         event.timestamp == 456L
     }
 

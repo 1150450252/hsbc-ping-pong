@@ -12,6 +12,23 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "com.hsbc.pingpong.common.event"
+        spring.json.value.default.type: "com.hsbc.pingpong.common.event.PingPongEvent"
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:pingpong}
+    username: ${POSTGRES_USER:appuser}
+    password: ${POSTGRES_PASSWORD:mysecretpassword}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
 
 hsbc:
   pingpong:
@@ -20,15 +37,18 @@ hsbc:
     rate-limit:
 #      type: redis-lua
       type: file-lock
-      max-tokens: 1
-      refill-per-second: 1
+      max-tokens: 2
+      refill-per-second: 2
       step: 1
       key: ping-pong-rate-limit
-      # file-lock 类型才生效;不配则默认 ${java.io.tmpdir}/<key>.lock
       lock-file: ./ping-pong-events.lock
     kafka:
       enabled: true
       topic: ping-pong-events
+      group-id: ping-service
+      max-retries: 3
+      retry-backoff-ms: 1000
+      dlt-topic: ping-pong-events-dlt
 
 logging:
   level:

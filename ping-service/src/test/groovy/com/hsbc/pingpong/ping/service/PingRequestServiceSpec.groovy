@@ -2,6 +2,7 @@ package com.hsbc.pingpong.ping.service
 
 import com.hsbc.pingpong.common.event.PingPongResult
 import com.hsbc.pingpong.ping.client.PingClient
+import com.hsbc.pingpong.ping.client.PongReply
 import com.hsbc.pingpong.ping.event.PingEventPublisher
 import com.hsbc.pingpong.ping.ratelimit.RateLimiter
 import reactor.core.publisher.Mono
@@ -37,7 +38,7 @@ class PingRequestServiceSpec extends Specification {
     def "records sent and pong responded when the limiter allows and pong returns 200"() {
         given:
         rateLimiter.tryAcquire() >> true
-        pingClient.ping() >> Mono.just(200)
+        pingClient.ping() >> Mono.just(new PongReply(200, "World"))
 
         when:
         def result = service.fireOnce().block()
@@ -50,7 +51,7 @@ class PingRequestServiceSpec extends Specification {
     def "records sent and pong throttled when pong returns 429"() {
         given:
         rateLimiter.tryAcquire() >> true
-        pingClient.ping() >> Mono.just(429)
+        pingClient.ping() >> Mono.just(new PongReply(429, "Pong throttled"))
 
         when:
         def result = service.fireOnce().block()

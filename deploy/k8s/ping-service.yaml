@@ -44,6 +44,16 @@ spec:
               value: ping-1
             - name: PONG_URL
               value: http://pong-service:8033
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: pingpong
+            - name: POSTGRES_USER
+              value: appuser
+            - name: POSTGRES_PASSWORD
+              value: mysecretpassword
           readinessProbe:
             tcpSocket:
               port: 8011
@@ -96,6 +106,16 @@ spec:
               value: ping-2
             - name: PONG_URL
               value: http://pong-service:8033
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: pingpong
+            - name: POSTGRES_USER
+              value: appuser
+            - name: POSTGRES_PASSWORD
+              value: mysecretpassword
           readinessProbe:
             tcpSocket:
               port: 8022

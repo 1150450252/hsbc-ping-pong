@@ -11,14 +11,26 @@ class PingSchedulerSpec extends Specification {
 
     def setup() {
         pingRequestService = Mock(PingRequestService)
-        scheduler = new PingScheduler(pingRequestService)
+        // jitter 上界取 1ms,nextLong(1) 恒为 0,让测试同步、不真实等待
+        scheduler = new PingScheduler(pingRequestService, 1)
     }
 
-    def "delegates each scheduled tick to the ping request service"() {
+    def "fires the ping request service after the jitter delay"() {
+        given:
+        pingRequestService.fireOnce() >> Mono.empty()
+
+        when:
+        scheduler.fire().block()
+
+        then:
+        1 * pingRequestService.fireOnce()
+    }
+
+    def "scheduled tick subscribes to the fire sequence without throwing"() {
         when:
         scheduler.pingOnce()
 
         then:
-        1 * pingRequestService.fireOnce() >> Mono.empty()
+        noExceptionThrown()
     }
 }

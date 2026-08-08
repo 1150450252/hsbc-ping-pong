@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="INSTANCE_ID" value="${PING_INSTANCE_ID:-ping}"/>
+    <springProperty name="INSTANCE_ID" source="hsbc.pingpong.instance-id" defaultValue="ping"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
