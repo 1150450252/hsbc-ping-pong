@@ -1,0 +1,13 @@
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# Runtime artifacts
+logs/
+*.log
+*.lock
+
+.DS_Store

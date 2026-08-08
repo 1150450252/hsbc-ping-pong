@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pg-secret
+  namespace: pingpong
+type: Opaque
+stringData:
+  POSTGRES_USER: appuser
+  POSTGRES_PASSWORD: mysecretpassword
+  POSTGRES_DB: pingpong
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: pingpong
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS ping_pong_event (
+        id          BIGSERIAL PRIMARY KEY,
+        instance_id VARCHAR(100),
+        source      VARCHAR(20),
+        result      VARCHAR(50),
+        result_zh   VARCHAR(100),
+        created_at  TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_ping_pong_event_created_at
+        ON ping_pong_event (created_at);
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pg-data
+  namespace: pingpong
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: pingpong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+        - name: pg-data
+          persistentVolumeClaim:
+            claimName: pg-data
+        - name: init-script
+          configMap:
+            name: postgres-init
+      containers:
+        - name: postgres
+          image: postgres:17
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secret
+                  key: POSTGRES_DB
+          volumeMounts:
+            - name: pg-data
+              mountPath: /var/lib/postgresql
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: pingpong
+spec:
+  type: LoadBalancer
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

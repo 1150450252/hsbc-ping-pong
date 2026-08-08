@@ -1,0 +1,35 @@
+server:
+  port: 8011
+
+spring:
+  application:
+    name: ping-service
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+hsbc:
+  pingpong:
+    instance-id: ${PING_INSTANCE_ID:ping-${server.port:8011}}
+    pong-url: ${PONG_URL:http://localhost:8033}
+    rate-limit:
+#      type: redis-lua
+      type: file-lock
+      max-tokens: 1
+      refill-per-second: 1
+      step: 1
+      key: ping-pong-rate-limit
+      # file-lock 类型才生效;不配则默认 ${java.io.tmpdir}/<key>.lock
+      lock-file: ./ping-pong-events.lock
+    kafka:
+      enabled: true
+      topic: ping-pong-events
+
+logging:
+  level:
+    com.hsbc.pingpong: INFO
