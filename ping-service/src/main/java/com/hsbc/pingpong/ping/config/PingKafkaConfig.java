@@ -1,0 +1,30 @@
+package com.hsbc.pingpong.ping.config;
+
+import com.hsbc.pingpong.common.event.PingPongEvent;
+import org.apache.kafka.common.TopicPartition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.util.backoff.FixedBackOff;
+
+@Configuration
+public class PingKafkaConfig {
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, PingPongEvent> kafkaListenerContainerFactory(
+            ConsumerFactory<String, PingPongEvent> consumerFactory,
+            KafkaTemplate<String, PingPongEvent> kafkaTemplate,
+            PingProperties properties) {
+        ConcurrentKafkaListenerContainerFactory<String, PingPongEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
+                (record, ex) -> new TopicPartition(properties.getKafka().getDltTopic(), record.partition()));
+        factory.setCommonErrorHandler(new DefaultErrorHandler(recoverer,
+                new FixedBackOff(properties.getKafka().getRetryBackoffMs(), properties.getKafka().getMaxRetries() + 1)));
+        return factory;
+    }
+}
