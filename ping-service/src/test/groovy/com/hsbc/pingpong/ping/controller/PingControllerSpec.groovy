@@ -24,12 +24,12 @@ class PingControllerSpec extends Specification {
         controller.trigger().block().statusCode == HttpStatus.OK
     }
 
-    def "returns 429 when the request was rate limited locally"() {
+    def "returns 503 when the request was rate limited locally"() {
         given:
         pingRequestService.fireOnce() >> Mono.just(PingPongResult.RATE_LIMITED_LOCALLY)
 
         expect:
-        controller.trigger().block().statusCode == HttpStatus.TOO_MANY_REQUESTS
+        controller.trigger().block().statusCode == HttpStatus.SERVICE_UNAVAILABLE
     }
 
     def "returns 429 when pong throttled the request"() {

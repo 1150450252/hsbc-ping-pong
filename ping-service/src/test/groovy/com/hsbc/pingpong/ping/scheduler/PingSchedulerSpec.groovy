@@ -11,8 +11,7 @@ class PingSchedulerSpec extends Specification {
 
     def setup() {
         pingRequestService = Mock(PingRequestService)
-        // jitter 上界取 1ms,nextLong(1) 恒为 0,让测试同步、不真实等待
-        scheduler = new PingScheduler(pingRequestService, 1)
+        scheduler = new PingScheduler(pingRequestService)
     }
 
     def "fires the ping request service after the jitter delay"() {
@@ -34,7 +33,7 @@ class PingSchedulerSpec extends Specification {
         noExceptionThrown()
     }
 
-    def "one-arg constructor used by Spring defaults jitter to the constant"() {
+    def "one-arg constructor used by Spring works"() {
         given:
         pingRequestService.fireOnce() >> Mono.empty()
 

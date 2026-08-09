@@ -8,6 +8,7 @@ spring:
 hsbc:
   pingpong:
     max-requests-per-second: 1
+    max-burst: 2
 
 logging:
   level:

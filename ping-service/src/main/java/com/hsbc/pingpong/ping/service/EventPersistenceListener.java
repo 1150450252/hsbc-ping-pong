@@ -27,8 +27,8 @@ public class EventPersistenceListener {
     @KafkaListener(topics = "${hsbc.pingpong.kafka.topic:ping-pong-events}",
             groupId = "${hsbc.pingpong.kafka.group-id:ping-service}")
     public void onEvent(PingPongEvent event) {
+        //todo 这里其实可以根据实际的场景，做下对应的防止重复消费。
         persist(event);
-        log.info("Persisted ping-pong event: {}", event.getInstanceId());
     }
 
     private void persist(PingPongEvent event) {

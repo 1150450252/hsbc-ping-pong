@@ -31,8 +31,11 @@ public class PingController {
         switch (result) {
             case SENT_PONG_RESPONDED:
                 return ResponseEntity.ok(result.getDescription());
-            default:
+            case SENT_PONG_THROTTLED:
+                // 429 只表示 pong 限流;本地限流用 503 区分(服务暂无法处理该请求)
                 return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(result.getDescription());
+            default:
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(result.getDescription());
         }
     }
 }

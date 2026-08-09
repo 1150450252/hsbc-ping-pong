@@ -61,14 +61,57 @@ class TokenBucketSpec extends Specification {
         tokenBucket.tryAcquire() == false
     }
 
-    def "Spring-injected constructor delegates to a full bucket"() {
+    def "Spring constructor defaults the burst to the sustained rate when unset"() {
         given:
-        def tokenBucket = new TokenBucket(2)
+        def tokenBucket = new TokenBucket(2, 0)
 
         expect:
         tokenBucket.tryAcquire() == true
         tokenBucket.tryAcquire() == true
         tokenBucket.tryAcquire() == false
+    }
+
+    def "Spring constructor honours an explicit burst above the rate"() {
+        given:
+        def tokenBucket = new TokenBucket(1, 3)
+
+        expect:
+        tokenBucket.tryAcquire() == true
+        tokenBucket.tryAcquire() == true
+        tokenBucket.tryAcquire() == true
+        tokenBucket.tryAcquire() == false
+    }
+
+    def "smooth refill plus burst buffer absorbs sub-second jitter without rejecting"() {
+        given:
+        def tokenBucket = new TokenBucket(2, 1, { now } as LongSupplier)
+        def gaps = [1000L, 995L, 1005L, 1000L, 995L, 1000L, 1005L]
+        def results = []
+
+        when:
+        gaps.each { gap ->
+            now += gap
+            results << tokenBucket.tryAcquire()
+        }
+
+        then:
+        results.every { it == true }
+    }
+
+    def "without a burst buffer the same jitter still starves a request"() {
+        given:
+        def tokenBucket = new TokenBucket(1, 1, { now } as LongSupplier)
+        def gaps = [1000L, 995L, 1005L, 1000L, 995L, 1000L, 1005L]
+        def results = []
+
+        when:
+        gaps.each { gap ->
+            now += gap
+            results << tokenBucket.tryAcquire()
+        }
+
+        then:
+        results.count { it } == 5
     }
 
     def "rejects a maxTokens below one"() {

@@ -57,6 +57,7 @@ public class FileLockRateLimiter implements RateLimiter {
 
     @Override
     public boolean tryAcquire() {
+        //这块加synchronized关键字是因为我之前测试的时候考虑到可能在跑pingservice的时候，定时器在调度，我也会手动调用到测试接口，所以加个了锁
         synchronized (MONITORS.computeIfAbsent(stateFile.toString(), key -> new Object())) {
             try {
                 return acquireWithLock();

@@ -13,19 +13,11 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 public class PingScheduler {
 
-    private static final int MAX_JITTER_MS = 50;
-
     private final PingRequestService pingRequestService;
-    private final long maxJitterMs;
 
     @Autowired
     public PingScheduler(PingRequestService pingRequestService) {
-        this(pingRequestService, MAX_JITTER_MS);
-    }
-
-    PingScheduler(PingRequestService pingRequestService, long maxJitterMs) {
         this.pingRequestService = pingRequestService;
-        this.maxJitterMs = maxJitterMs;
     }
 
     @Scheduled(fixedRate = 1000)
@@ -34,9 +26,8 @@ public class PingScheduler {
     }
 
     Mono<PingPongResult> fire() {
-        //这块为了模拟下网络抖动，自己测试用的
-//        long jitterMs = ThreadLocalRandom.current().nextLong(maxJitterMs);
-        long jitterMs = 0;
+        // 模拟网络抖动(0~100ms),让多实例的到达顺序随机、都有争抢令牌的机会
+        long jitterMs = ThreadLocalRandom.current().nextLong(100);
         return Mono.delay(Duration.ofMillis(jitterMs))
                 .flatMap(ignored -> pingRequestService.fireOnce());
     }
