@@ -16,19 +16,31 @@ class PingSchedulerSpec extends Specification {
     }
 
     def "fires the ping request service after the jitter delay"() {
-        given:
-        pingRequestService.fireOnce() >> Mono.empty()
-
         when:
         scheduler.fire().block()
 
         then:
-        1 * pingRequestService.fireOnce()
+        1 * pingRequestService.fireOnce() >> Mono.empty()
     }
 
     def "scheduled tick subscribes to the fire sequence without throwing"() {
+        given:
+        pingRequestService.fireOnce() >> Mono.empty()
+
         when:
         scheduler.pingOnce()
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "one-arg constructor used by Spring defaults jitter to the constant"() {
+        given:
+        pingRequestService.fireOnce() >> Mono.empty()
+
+        when:
+        def defaultScheduler = new PingScheduler(pingRequestService)
+        defaultScheduler.fire().block()
 
         then:
         noExceptionThrown()

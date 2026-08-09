@@ -23,6 +23,7 @@
         <module>common</module>
         <module>pong-service</module>
         <module>ping-service</module>
+        <module>coverage-report</module>
     </modules>
 
     <properties>
